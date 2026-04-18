@@ -27,6 +27,11 @@ class ModelTypes(StrEnum):
     OTHER = "other"
 
 
+class ModelUnavailableError(RuntimeError):
+    """Raised when a requested model is not available (HTTP 404)"""
+    pass
+
+
 class BaseLLMService:
     """Базовый класс для LLM сервисов. Конкретные реализации (Gemini, Perplexity, OpenAI) наследуют его и реализуют методы.
     Это позволяет абстрагировать логику ассистента от конкретных провайдеров и легко добавлять новые.

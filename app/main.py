@@ -34,11 +34,11 @@ SESSION_MAX_AGE_IN_SECONDS = 86400 * 30
 settings = get_settings()
 
 from app.services.llm_services.gemini_service import GeminiService
-from app.services.openrouter_service import OpenRouterService
-from app.services.openai_service import OpenAIService
-from app.services.groq_service import GroqService
-from app.services.zhipu_service import ZhipuService
-from app.services.perplexity_service import PerplexityService
+from app.services.llm_services.openrouter_service import OpenRouterService
+from app.services.llm_services.openai_service import OpenAIService
+from app.services.llm_services.groq_service import GroqService
+from app.services.llm_services.zhipu_service import ZhipuService
+from app.services.llm_services.perplexity_service import PerplexityService
 import asyncio
 
 

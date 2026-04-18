@@ -74,3 +74,4 @@ firebase-credentials.json
 firebase-adminsdk-*.json
 .firebase/
 **/firebase-credentials*.json
+/logs/

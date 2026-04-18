@@ -1,10 +1,9 @@
 from __future__ import annotations
-
+import asyncio
 import json
 import logging
 import time
 import random
-import asyncio
 from typing import Any, Optional, override
 from pathlib import Path
 
@@ -12,18 +11,22 @@ import requests
 from requests import Response
 
 from app.models.assistant_models import MemoryMessage
-from app.services.llm_services.base_llm_service import BaseLLMService, ModelTypes, ModelUnavailableError
+from app.services.llm_services.base_llm_service import BaseLLMService, ModelTypes, AnswerSize, ModelUnavailableError
 from app.services.rate_limiter import get_rate_limiter
 
 logger = logging.getLogger(__name__)
 
 
-class GeminiService(BaseLLMService):
+class MistralService(BaseLLMService):
     def __init__(self) -> None:
         super().__init__()
-        self.api_key = self.settings.gemini_api_key
-        self.timeout = self.settings.timeout_seconds
-        self.max_retries = getattr(self.settings, "gemini_max_retries", 3)
+        self.api_key = self.settings.mistral_api_key
+        self.timeout = 30
+        self.max_retries = 5
+
+        self.service_name = "mistral"
+        self.unavailable_until = 0
+
         redis_url = getattr(self.settings, "redis_url", None)
         self.rate_limiter = get_rate_limiter(redis_url=redis_url, rpm=12, rpd=450)
 
@@ -35,30 +38,19 @@ class GeminiService(BaseLLMService):
 
         with open(rankings_file, 'r', encoding='utf-8') as f:
             rankings = json.load(f)
-            self.models = rankings.get('gemini', None)
+            self.models = rankings.get('mistral', None)
             if self.models is None:
-                logger.warning("Модели Gemini не подгружены")
+                logger.warning("Модели Mistral не подгружены")
                 self.api_key = None
 
         self.unavailable_models: dict[str, float] = {}
-        self._disable_404_seconds = getattr(self.settings, 'gemini_model_disable_404_seconds', 3600)
-        self._cooldown_429_seconds = getattr(self.settings, 'gemini_model_cooldown_429_seconds', 60)
 
-    def __del__(self) -> None:
-        current_dir = Path(__file__).parent  # app/services/llm_services/
-        rankings_file = current_dir / 'model_rankings_new.json'
-
-        if not rankings_file.exists():
-            raise RuntimeError()
-
-        with open(rankings_file, 'w', encoding='utf-8') as f:
-            rankings = json.load(f)
-            rankings['gemini'] = self.models
-            json.dump(rankings, f, indent=2, ensure_ascii=False)
+    def is_available(self) -> bool:
+        return self.enabled and time.time() > self.unavailable_until
 
     @override
     def craft_url(self, model: str) -> str:
-        return f'https://generativelanguage.googleapis.com/v1beta/models/{model}?key={self.api_key}'
+        return "https://api.mistral.ai/v1/chat/completions"
 
     def save_response_to_logs(self, model: str, response: Response) -> None:
         if self.settings.debug:
@@ -66,7 +58,7 @@ class GeminiService(BaseLLMService):
                 ts = int(time.time())
                 logs_dir = Path("logs")
                 logs_dir.mkdir(parents=True, exist_ok=True)
-                file_path = logs_dir / f"gemini_{response.status_code}_{model}_{ts}.json"
+                file_path = logs_dir / f"{self.service_name}_{response.status_code}_{model}_{ts}.json"
                 with file_path.open("w", encoding="utf-8") as f:
                     f.write(response.json())
             except Exception as ex:
@@ -75,10 +67,6 @@ class GeminiService(BaseLLMService):
     @override
     def get_next_model(self, model_type: ModelTypes) -> Optional[str]:
         models = self.models[model_type.value]
-
-        if model_type == ModelTypes.TEXT:
-            models |= self.models(ModelTypes.SMALL.value)
-
         if not models:
             return None
 
@@ -93,10 +81,22 @@ class GeminiService(BaseLLMService):
                 self.models[category][model] *= weight
                 return
 
+    @staticmethod
+    def craft_payload(
+            parts: list[dict[str, Any]],
+            size: AnswerSize = AnswerSize.STANDARD,
+            creativity: float = 0.7
+    ) -> dict[str, Any]:
+        return {
+            "messages": [parts],
+            "max_tokens": size.value,
+            "temperature": creativity
+        }
+
     def _post_generate_content_with_retries(self, model: str, parts: list[dict[str, Any]]) -> dict[str, Any]:
         """Синхронный helper, который выполняет requests.post с retry и возвращает json."""
         if not self.enabled:
-            raise RuntimeError("GEMINI_API_KEY не настроен")
+            raise RuntimeError(f"{self.service_name.upper()}_API_KEY не настроен")
 
         now_ts = time.time()
         disabled_until = self.unavailable_models.get(model)
@@ -109,11 +109,12 @@ class GeminiService(BaseLLMService):
 
         url = self.craft_url(model)
         payload = self.craft_payload(parts)
+        payload['model'] = model
 
         try:
             response = requests.post(
                 url=url,
-                headers={"Content-Type": "application/json"},
+                headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.api_key}"},
                 data=json.dumps(payload),
                 timeout=self.timeout
             )
@@ -131,24 +132,24 @@ class GeminiService(BaseLLMService):
                 return response.json()
 
             if response.status_code == 429:
-                self.unavailable_models[model] = time.time() + self._cooldown_429_seconds
-                raise ModelUnavailableError(f"Gemini {model} слишком много запросов (429). Модель временно приостановлена.")
+                self.unavailable_models[model] = time.time() + 1 + random.random() * 3600
+                raise ModelUnavailableError(f"{self.service_name.title()} {model} слишком много запросов (429). Модель временно приостановлена.")
 
             if response.status_code == 404:
-                self.unavailable_models[model] = time.time() + self._disable_404_seconds
-                raise ModelUnavailableError(f"Gemini {model} не найден (404). Модель временно приостановлена.")
+                self.unavailable_models[model] = time.time() + 1 + random.random() * 1000
+                raise ModelUnavailableError(f"{self.service_name.title()} {model} не найден (404). Модель временно приостановлена.")
 
             if 500 <= response.status_code < 600:
-                logger.warning(f"Gemini 5xx ошибка: {response.status_code}")
+                logger.warning(f"{self.service_name.title()} 5xx ошибка: {response.status_code}")
                 time.sleep(1 + random.random())
 
-                raise RuntimeError(f"Ошибка Gemini API {response.status_code}: {response.text}")
+                raise RuntimeError(f"Ошибка {self.service_name.title()} API {response.status_code}: {response.text}")
 
         except requests.RequestException as e:
-            logger.warning(f"Ошибка сети в сервисе Gemini: {e}")
+            logger.warning(f"Ошибка сети в сервисе {self.service_name.title()}: {e}")
             time.sleep(1 + random.random())
 
-        raise RuntimeError("Gemini исчерпал все попытки запроса.")
+        raise RuntimeError(f"{self.service_name.title()} исчерпал все попытки запроса.")
 
     def __model_available(self, m_name: str) -> bool:
         until = self.unavailable_models.get(m_name)
@@ -156,23 +157,23 @@ class GeminiService(BaseLLMService):
 
     @override
     async def generate_text(
-        self,
-        prompt: str,
-        system_prompt: Optional[str] = None,
-        context_messages: Optional[list[MemoryMessage]] = None,
-        summary: Optional[str] = None,
-        response_mime_type: Optional[str] = None,
+            self,
+            prompt: str,
+            system_prompt: Optional[str] = None,
+            context_messages: Optional[list[MemoryMessage]] = None,
+            summary: Optional[str] = None,
+            response_mime_type: Optional[str] = None,
     ) -> dict[str, Any]:
 
         result: dict[str, Any] = {}
         all_parts: list[dict[str, Any]] = []
         if system_prompt:
-            all_parts.append({"text": f"SYSTEM:\n{system_prompt.strip()}"})
+            all_parts.append({"content": f"SYSTEM:\n{system_prompt.strip()}", "role": "system"})
         if context_messages:
             context_text = self.build_context_text(context_messages, summary=summary)
             if context_text:
-                all_parts.append({"text": f"CONTEXT:\n{context_text}"})
-        all_parts.append({"text": prompt.strip()})
+                all_parts.append({"content": f"CONTEXT:\n{context_text}", "role": "system"})
+        all_parts.append({"content": prompt.strip(), "role": "user"})
 
         if getattr(self.settings, 'assistant_force_local_llm', False):
             logger.info("assistant_force_local_llm включен — возврат локального ответа без вызова API")
@@ -201,7 +202,7 @@ class GeminiService(BaseLLMService):
                     "text": text,
                     "raw": raw,
                     "tokens_used": self.estimate_tokens(usage_text) + self.estimate_tokens(text),
-                    "provider": "gemini",
+                    "provider": self.service_name,
                 }
                 self.update_model(model)
                 break
@@ -216,7 +217,7 @@ class GeminiService(BaseLLMService):
                 continue
 
         if not result:
-            raise RuntimeError(f"Gemini не вернула ответ ни на один запрос; last_error={last_error}")
+            raise RuntimeError(f"{self.service_name.title()} не вернула ответ ни на один запрос; last_error={last_error}")
 
         if response_mime_type == "application/json":
             parsed_json: dict[str, Any] | None
@@ -226,30 +227,7 @@ class GeminiService(BaseLLMService):
                 parsed_json = json.loads(clean_text)
             except Exception as ex:
                 parsed_json = None
-                logger.warning("Не удалось распарсить JSON из ответа Gemini: %s", ex)
+                logger.warning(f"Не удалось распарсить JSON из ответа {self.service_name}: %s", ex)
             result["json"] = parsed_json
 
         return result
-
-    @override
-    async def generate_embeddings(self, text: str, model: Optional[str] = None) -> list[float] | None:
-        """Попытаться получить эмбеддинг через Gemini embedding модель.
-        Если запрос не удался — вернуть детерминированный псевдо-вектор (fallback).
-        """
-        if not text or not self.enabled:
-            return None
-
-        model = model or self.get_next_model(ModelTypes.EMBEDDING)
-        url = self.craft_url(model)
-        payload = {"input": [text]}
-        text = text[:2048]
-
-        try:
-            resp = await asyncio.to_thread(requests.post, url, json=payload, timeout=self.timeout)
-            resp.raise_for_status()
-            data = resp.json()
-
-            self.update_model(model)
-            raise NotImplementedError()
-        except Exception as ex:
-            logger.debug("Ошибка построения эмбедингов: %s", ex)

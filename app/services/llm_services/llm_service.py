@@ -6,13 +6,13 @@ from typing import Any, Optional
 from app.core.config import get_settings
 from app.models.assistant_models import AssistantMode, MemoryMessage
 from app.services.llm_services.gemini_service import GeminiService
-from app.services.groq_service import GroqService
+from app.services.llm_services.groq_service import GroqService
 from app.services.llm_services.base_llm_service import BaseLLMService
-from app.services.mistral_service import MistralService
-from app.services.zhipu_service import ZhipuService
-from app.services.openrouter_service import OpenRouterService
-from app.services.perplexity_service import PerplexityService
-from app.services.openai_service import OpenAIService
+from app.services.llm_services.mistral_service import MistralService
+from app.services.llm_services.zhipu_service import ZhipuService
+from app.services.llm_services.openrouter_service import OpenRouterService
+from app.services.llm_services.perplexity_service import PerplexityService
+from app.services.llm_services.openai_service import OpenAIService
 from app.services.rate_limiter import get_rate_limiter
 from app.services import token_utils
 import time
@@ -25,12 +25,12 @@ class LLMService:
 
         self.providers_order: list[tuple[str, BaseLLMService]] = [
             ("gemini", GeminiService()),
-            # ("groq", GroqService()),
-            # ("mistral", MistralService()),
-            # ("zhipu", ZhipuService()),
-            # ("openrouter", OpenRouterService()),
-            # ("perplexity", PerplexityService()),
-            # ("openai", OpenAIService()),
+            ("groq", GroqService()),
+            ("mistral", MistralService()),
+            ("zhipu", ZhipuService()),
+            ("openrouter", OpenRouterService()),
+            ("perplexity", PerplexityService()),
+            ("openai", OpenAIService()),
         ]
 
         self.provider_status: dict[str, dict] = {}

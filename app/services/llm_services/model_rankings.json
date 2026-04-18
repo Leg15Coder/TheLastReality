@@ -31,5 +31,109 @@
     },
     "geolocation" : {},
     "other": {}
+  },
+  "groq": {
+    "text":
+    {
+      "llama-3.3-70b-versatile": 1.1,
+      "allam-2-7b": 0.9,
+      "groq/compound": 0.9,
+      "groq/compound-mini": 0.9,
+      "meta-llama/llama-4-scout-17b-16e-instruct": 0.9,
+      "meta-llama/llama-4-maverick-17b-128e-instruct": 1.0,
+      "meta-llama/llama-prompt-guard-2-22m": 0.9,
+      "meta-llama/llama-prompt-guard-2-86m": 0.9,
+      "moonshotai/kimi-k2-instruct": 0.9,
+      "moonshotai/kimi-k2-instruct-0905": 0.9,
+      "openai/gpt-oss-120b": 0.9,
+      "openai/gpt-oss-20b": 0.9,
+      "openai/gpt-oss-safeguard-20b": 0.9,
+      "qwen/qwen3-32b": 0.9,
+      "deepseek-r1-distill-qwen-32b": 1.0,
+      "deepseek-r1-distill-llama-70b": 1.001
+    },
+    "audio":
+    {
+      "whisper-large-v3": 1.0,
+      "whisper-large-v3-turbo": 0.9
+    },
+    "image": {},
+    "embedding": {},
+    "small" : {
+      "gemma2-9b-it": 0.5,
+      "gemma-7b-it": 0.5,
+      "mixtral-8x7b-32768": 0.4,
+      "llama-3.1-8b-instant": 0.9
+    },
+    "geolocation" : {},
+    "other": {}
+  },
+  "mistral": {
+    "text":
+    {
+      "mistral-vibe-cli-latest": 1.0,
+      "devstral-2512": 1.0,
+      "labs-leanstral-2603": 1.0,
+      "devstral-latest": 1.0,
+      "devstral-medium-latest": 1.0
+    },
+    "audio": {},
+    "image": {},
+    "embedding": {},
+    "small" : {},
+    "geolocation" : {},
+    "other": {}
+  },
+  "zhipu": {
+    "text":
+    {
+      "glm-4.7-flash": 1.0
+    },
+    "audio": {},
+    "image": {},
+    "embedding": {},
+    "small" : {},
+    "geolocation" : {},
+    "other": {}
+  },
+  "openrouter": {
+    "text":
+    {
+      "openrouter/free": 10.0,
+      "meta-llama/llama-4-maverick:free": 1.0,
+      "meta-llama/llama-4-scout:free": 1.0,
+      "google/gemini-2.5-pro-exp-03-25:free": 1.0,
+      "arcee-ai/trinity-large-preview:free": 1.0,
+      "arcee-ai/trinity-mini:free": 1.0,
+      "qwen/qwen3-coder-480b-a35b-instruct:free ": 1.0,
+      "qwen/qwen3-next-80b-a3b-instruct:free": 1.0,
+      "deepseek/deepseek-v3-base:free": 1.0,
+      "deepseek/deepseek-r1-zero:free": 1.0,
+      "deepseek/deepseek-chat-v3-0324:free": 1.0,
+      "deepseek/deepseek-r1:free": 1.0,
+      "openai/gpt-oss-120b:free": 1.0,
+      "openai/gpt-oss-20b:free": 1.0,
+      "mistralai/mistral-small-3.1-24b-instruct:free": 1.0,
+      "stepfun/step-3.5-flash:free": 1.0,
+      "z-ai/glm-4.5-air:free": 1.0,
+      "minimax/minimax-m2.5:free": 1.0,
+      "moonshotai/kimi-vl-a3b-thinking:free": 1.0,
+      "openrouter/cypher-alpha:free": 1.0,
+      "openrouter/optimus-alpha:free": 1.0,
+      "openrouter/quasar-alpha:free": 1.0,
+      "meta-llama/llama-3.3-70b-instruct:free": 1.0
+    },
+    "audio": {},
+    "image": {},
+    "embedding": {},
+    "small" : {
+      "nvidia/nemotron-3-super:free": 1.0,
+      "qwen/qwen2.5-vl-3b-instruct:free": 1.0,
+      "nvidia/nemotron-nano-9b-v2:free": 1.0,
+      "nvidia/llama-3.1-nemotron-nano-8b-v1:free": 1.0,
+      "nvidia/nemotron-nano-2-vl:free": 1.0
+    },
+    "geolocation" : {},
+    "other": {}
   }
 }

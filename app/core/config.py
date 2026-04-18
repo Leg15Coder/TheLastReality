@@ -28,7 +28,7 @@ class Settings(BaseSettings):
 
     # Assistant / Gemini
     gemini_api_key: str = ""
-    gemini_timeout_seconds: int = 30
+    timeout_seconds: int = 30
     gemini_max_retries: int = 5
     gemini_model_disable_404_seconds: int = 3600  # how long to mark a model disabled on 404 (default 1 hour)
     gemini_model_cooldown_429_seconds: int = 60   # cooldown on 429 (short)
@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     perplexity_api_key: str = ""
     openrouter_api_key: str = ""
+    groq_api_key: str = ""
+    mistral_api_key: str = ""
+    zhipu_api_key: str = ""
 
     # Local fallback assistant (dev helper) — when true, GeminiService вернёт локальный ответ вместо вызова внешних LLM
     assistant_force_local_llm: bool = False
