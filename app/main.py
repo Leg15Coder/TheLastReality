@@ -17,6 +17,7 @@ from app.auth.profile_routes import router as profile_router
 import app.shop.routes as shop_routes
 from app.physics.main import router as physics_router
 from app.main_page import router as main_router
+from app.api.endpoints.stats import router as stats_router
 from app.tasks.database import SessionLocal
 from app.auth.models import User as AuthUser
 try:
@@ -67,6 +68,8 @@ app = FastAPI(
     redoc_url="/redoc" if settings.debug else None,
     lifespan=lifespan,
 )
+
+app.include_router(stats_router, prefix="/api")
 
 app.add_middleware(
     CORSMiddleware,

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Т.13 — Квантиль и бутстреп</title>
+    <link rel="stylesheet" href="/static/t13.css">
+</head>
+<body>
+<div class="page">
+    <header class="page-header">
+        <h1>Задача Т.13 — оценка квантиля и бутстреп</h1>
+        <p class="lead">Генерируем выборку из N(70,10), оцениваем квантиль и его точность бутстрепом.</p>
+    </header>
+
+    <main class="page-main">
+        <section class="controls card">
+            <form id="t13-form">
+                <div class="form-row">
+                    <label for="n">Размер выборки (n)</label>
+                    <input id="n" name="n" type="number" value="1000" min="1" required />
+                </div>
+                <div class="form-row">
+                    <label for="p_values">Квантиль(и) p (через запятую)</label>
+                    <input id="p_values" name="p_values" type="text" value="0.95,0.9,0.8" placeholder="0.95,0.9,0.8" />
+                </div>
+                <div class="form-row">
+                    <label for="bootstrap_iters">Бутстреп итераций (B)</label>
+                    <input id="bootstrap_iters" name="bootstrap_iters" type="number" value="1000" min="50" max="10000" />
+                </div>
+                <div class="form-row">
+                    <label for="seed">Seed (необязательно)</label>
+                    <input id="seed" name="seed" type="text" value="" placeholder="оставьте пустым для случайного" />
+                </div>
+
+                <div class="form-actions">
+                    <button id="run-btn" class="btn-primary" type="submit">Запустить</button>
+                    <button id="reset-btn" class="btn-ghost" type="button">Сброс</button>
+                    <div id="status" class="status"></div>
+                </div>
+            </form>
+        </section>
+
+        <section id="results" class="results"></section>
+    </main>
+</div>
+
+<div id="img-modal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+        <button id="modal-close" class="modal-close">✕</button>
+        <img id="modal-img" src="" alt="" />
+        <div id="modal-caption" class="modal-caption"></div>
+    </div>
+</div>
+
+<script src="/static/t13.js"></script>
+</body>
+</html>

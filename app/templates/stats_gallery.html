@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Stats Simulator Gallery{% endblock %}
+
+{% block content %}
+<div class="gallery-container" style="max-width:1400px; margin: 2rem auto; padding: 1.5rem; text-align: center;">
+  <h1 style="font-size: 2.5rem; color: #fff; text-shadow: 0 4px 12px rgba(110,69,226,0.3); margin-bottom: 2rem;">Галерея Статистических Задач</h1>
+  <p style="color: #aaa; font-size: 1.2rem; margin-bottom: 3rem;">Выберите задачу для просмотра симуляций, графиков и теоретической справки.</p>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+    <a href="/api/stats/t6" style="text-decoration: none; color: inherit; display: block;">
+      <div class="task-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 2rem; border-radius: 16px; transition: transform 0.2s ease, box-shadow 0.2s ease; height: 100%;">
+        <h2 style="font-size: 1.5rem; color: #fff; margin-bottom: 1rem;">T.6 & T.7: Распределение Коши и N(θ, 1)</h2>
+        <p style="color: #ccc; line-height: 1.5;">Сравнение выборочной медианы и среднего. Оценка параметра сдвига и асимптотическая нормальность.</p>
+      </div>
+    </a>
+
+    <a href="/api/stats/t10" style="text-decoration: none; color: inherit; display: block;">
+      <div class="task-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 2rem; border-radius: 16px; transition: transform 0.2s ease, box-shadow 0.2s ease; height: 100%;">
+        <h2 style="font-size: 1.5rem; color: #fff; margin-bottom: 1rem;">T.10: Статистика Колмогорова</h2>
+        <p style="color: #ccc; line-height: 1.5;">Эмпирическая функция распределения, теорема Гливенко-Кантелли и асимптотическое распределение $K(x)$.</p>
+      </div>
+    </a>
+
+    <a href="/api/stats/t11_12" style="text-decoration: none; color: inherit; display: block;">
+      <div class="task-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 2rem; border-radius: 16px; transition: transform 0.2s ease, box-shadow 0.2s ease; height: 100%;">
+        <h2 style="font-size: 1.5rem; color: #fff; margin-bottom: 1rem;">T.11 & T.12: Доверительные интервалы</h2>
+        <p style="color: #ccc; line-height: 1.5;">Построение точных ДИ для величин $N(\theta, 1)$ и $Pois(\theta)$. Изменение длины ДИ с ростом размера выборки $n$.</p>
+      </div>
+    </a>
+
+    <a href="/api/stats/t8" style="text-decoration: none; color: inherit; display: block;">
+      <div class="task-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 2rem; border-radius: 16px; transition: transform 0.2s ease, box-shadow 0.2s ease; height: 100%;">
+        <h2 style="font-size: 1.5rem; color: #fff; margin-bottom: 1rem;">T.8: Оценки для U[0, θ]</h2>
+        <p style="color: #ccc; line-height: 1.5;">Сравнение ОМП (оптимальной оценки) и оценки Методом Моментов. Анализ неравенства Крамера-Рао и нарушение регулярности.</p>
+      </div>
+    </a>
+  </div>
+</div>
+
+<style>
+  .task-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(110,69,226,0.25);
+    background: rgba(255,255,255,0.06);
+  }
+</style>
+{% endblock %}

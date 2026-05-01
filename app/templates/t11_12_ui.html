@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Task 11 & 12 (Confidence Intervals){% endblock %}
+
+{% block content %}
+<div class="stats-container">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.8rem;">
+    <h1 style="margin:0;">T.11 & T.12: Доверительные интервалы</h1>
+    <a href="/api/stats" style="color: #fff; text-decoration: none; background: rgba(255,255,255,0.1); padding: 0.5rem 1rem; border-radius: 8px;">⬅ В галерею</a>
+  </div>
+
+  <form id="params-form" action="/api/stats/t11_12/run" method="post" onsubmit="return false;">
+    <div class="form-row">
+      <div class="form-field">
+        <label for="distribution">Distribution</label>
+        <select name="distribution" id="distribution">
+          <option value="normal">Normal N(theta, 1)</option>
+          <option value="poisson">Poisson Pois(theta)</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="samples">Размеры выборки (n)</label>
+        <input type="text" name="samples" id="samples" value="5, 10, 100" />
+      </div>
+
+      <div class="form-field">
+        <label for="seed">Seed (optional)</label>
+        <input type="text" name="seed" id="seed" placeholder="Random" />
+      </div>
+
+      <div class="form-actions">
+        <button type="button" id="run-btn">Построить интервалы</button>
+      </div>
+    </div>
+  </form>
+
+  <div id="status" class="status"></div>
+
+  <div id="runs-container"></div>
+</div>
+
+<div id="image-modal" class="image-modal" aria-hidden="true">
+  <div class="image-modal__backdrop" id="modal-backdrop"></div>
+  <div class="image-modal__content" role="dialog" aria-modal="true">
+    <button id="modal-close" class="modal-close" aria-label="Close">✕</button>
+    <img id="modal-img" src="" alt="Full size chart" />
+    <div class="modal-caption" id="modal-caption"></div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="/static/css/stats_ui.css">
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('params-form');
+  const status = document.getElementById('status');
+  const runsContainer = document.getElementById('runs-container');
+  const runBtn = document.getElementById('run-btn');
+  const modal = document.getElementById('image-modal');
+  const modalImg = document.getElementById('modal-img');
+  const modalCaption = document.getElementById('modal-caption');
+
+  function openModal(src, caption) {
+    modalImg.src = src; modalCaption.textContent = caption || '';
+    modal.setAttribute('aria-hidden', 'false'); modal.classList.add('open');
+  }
+  document.getElementById('modal-close').addEventListener('click', () => { modal.classList.remove('open'); });
+  document.getElementById('modal-backdrop').addEventListener('click', () => { modal.classList.remove('open'); });
+
+  async function runSimulation() {
+    runsContainer.innerHTML = '';
+    status.textContent = 'Вычисляю...'; status.className = 'status';
+    runBtn.disabled = true;
+
+    try {
+      const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'x-requested-with': 'XMLHttpRequest' } });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      status.textContent = 'Готово!';
+      const card = document.createElement('div'); card.className = 'result-card';
+      const grid = document.createElement('div'); grid.className = 'images-grid';
+
+      data.images.forEach(imgData => {
+        const col = document.createElement('div'); col.className = 'img-col';
+        const label = document.createElement('div'); label.className = 'img-label'; label.textContent = imgData.title;
+        const img = document.createElement('img'); img.className = 'result-img'; img.src = imgData.src;
+        img.addEventListener('click', () => openModal(imgData.src, imgData.title));
+        col.appendChild(label); col.appendChild(img); grid.appendChild(col);
+      });
+      card.appendChild(grid); runsContainer.appendChild(card);
+    } catch (err) {
+      status.textContent = 'Ошибка: ' + err.message; status.className = 'status error';
+    } finally { runBtn.disabled = false; }
+  }
+
+  runBtn.addEventListener('click', runSimulation);
+});
+</script>
+{% endblock %}

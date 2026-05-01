@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Task 10 (Kolmogorov-Smirnov){% endblock %}
+
+{% block content %}
+<div class="stats-container">
+  <h1>T.10: Исследование статистики Колмогорова</h1>
+
+  <form id="params-form" action="/api/stats/t10/run" method="post">
+    <div class="form-row">
+      <div class="form-field">
+        <label for="n">Sample Size (n)</label>
+        <input type="number" name="n" id="n" value="1000" min="10" max="10000" step="1" />
+      </div>
+
+      <div class="form-field" title="Количество выборок для симуляции эмпирического распределения √n Dn">
+        <label for="simulations">Simulations (d)</label>
+        <input type="number" name="simulations" id="simulations" value="1000" min="50" max="5000" step="50" />
+      </div>
+
+      <div class="form-field">
+        <label for="seed">Seed (optional)</label>
+        <input type="text" name="seed" id="seed" placeholder="Random" />
+      </div>
+
+      <div class="form-actions">
+        <button type="button" id="run-btn" onclick="window.runT10Simulation && window.runT10Simulation()">Run Experiment</button>
+      </div>
+    </div>
+  </form>
+
+  <div id="status" class="status"></div>
+
+  <div id="runs-container"></div>
+</div>
+
+<div id="image-modal" class="image-modal" aria-hidden="true">
+  <div class="image-modal__backdrop" id="modal-backdrop"></div>
+  <div class="image-modal__content" role="dialog" aria-modal="true">
+    <button id="modal-close" class="modal-close" aria-label="Close">✕</button>
+    <img id="modal-img" src="" alt="Full size chart" />
+    <div class="modal-caption" id="modal-caption"></div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="/static/css/stats_ui.css">
+<script src="/static/js/t10_ui.js" defer></script>
+{% endblock %}

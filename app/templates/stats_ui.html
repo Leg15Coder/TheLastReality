@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Statistics Simulator{% endblock %}
+
+{% block content %}
+<div class="stats-container">
+  <h1>T.6 / T.7</h1>
+
+  <form id="params-form" action="/api/stats/run" method="post" onsubmit="return false;">
+    <div class="form-row">
+      <div class="form-field">
+        <label for="distribution">Distribution</label>
+        <select name="distribution" id="distribution">
+          <option value="cauchy">Cauchy</option>
+          <option value="normal">Normal N(theta,1)</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="runs">Runs</label>
+        <input type="number" name="runs" id="runs" value="1" min="1" max="10" />
+      </div>
+
+      <div class="form-field">
+        <label for="n">Sample Size (n)</label>
+        <input type="number" name="n" id="n" value="1000" min="10" step="10" />
+      </div>
+
+      <div class="form-field">
+        <label for="repeats">Repeats</label>
+        <input type="number" name="repeats" id="repeats" value="101" min="3" step="1" />
+      </div>
+
+      <div class="form-field">
+        <label for="bins">Histogram bins</label>
+        <input type="number" name="bins" id="bins" value="20" min="5" max="200" step="1" />
+      </div>
+
+      <div class="form-field">
+        <label for="seed">Seed (optional)</label>
+        <input type="text" name="seed" id="seed" placeholder="Random" />
+      </div>
+
+      <div class="form-actions">
+        <button type="button" id="run-btn">Run Simulation</button>
+      </div>
+    </div>
+  </form>
+
+  <div id="status" class="status"></div>
+
+  <div id="runs-container"></div>
+</div>
+
+<div id="image-modal" class="image-modal" aria-hidden="true">
+  <div class="image-modal__backdrop" id="modal-backdrop"></div>
+  <div class="image-modal__content" role="dialog" aria-modal="true">
+    <button id="modal-close" class="modal-close" aria-label="Close">✕</button>
+    <img id="modal-img" src="" alt="Full size chart" />
+    <div class="modal-caption" id="modal-caption"></div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="/static/css/stats_ui.css">
+<script src="/static/js/stats_ui.js" defer></script>
+{% endblock %}
